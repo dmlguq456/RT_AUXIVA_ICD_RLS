@@ -12,8 +12,8 @@ AUXIVA_ICD::AUXIVA_ICD()
 	nfreq = nfft / 2 + 1;
 	//epsi = 0.000001;
 	epsi = 2.220446049250313*1E-16;
-	eps = 1E-8;
-	f_alpha = 0.98;
+	eps = 1E-6;
+	f_alpha = 0.97;
 	f_alpha2 = 0.0;
 	double max = 32767;
 	int i, j, k, freq, ch;
