@@ -17,6 +17,7 @@ input directly through to the output.
 #include <iostream>
 #include "header.h"
 #include "ProcBuffers.h"
+#include <thread>
 
 /*
 typedef char MY_TYPE;
@@ -29,6 +30,11 @@ typedef signed short MY_TYPE;
 
 int record_num = 0;
 int copyend = 0;
+int start = 2;
+bool fF4 = false;
+bool fF5 = false;
+bool fF6 = false;
+
 /*
 typedef S24 MY_TYPE;
 #define FORMAT RTAUDIO_SINT24
@@ -131,163 +137,223 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 	return 0;
 }
 
+void Keyboard_interrupt()
+{
+	while (true)
+	{
+		if (GetKeyState('S') < 0 && !fF4) // Stop
+		{
+			fF4 = true;
+			if (MAKE_FILE == 1) std::cout << "Recording and Processing have stopped" << std::endl;
+		}
+		if (GetKeyState('A') < 0 && !fF5) // Begin
+		{
+			fF5 = true;
+			if (MAKE_FILE == 1) std::cout << "Recording and Processing has begun" << std::endl;
+		}
+		if (GetKeyState('D') < 0 && !fF6) // Quit
+		{
+			fF6 = true;
+			if (MAKE_FILE == 1) std::cout << "Program will be closed" << std::endl;
+			return;
+		}
+		SLEEP(50);
+	}
+}
+
 int main(void)
 {
-	unsigned int channels, fs, bufferBytes, oDevice = 0, iDevice = 0, iOffset = 0, oOffset = 0;
-	double time = 16;
-	int in_buffer_cnt = 0;
-	int out_buffer_cnt = 0;
-	int i, j, ch;
-	int proc_end = 0;
-	int proc_count = 0;
 
-	double **input, **proc_output;
-
-	input = new double *[Nch];
-	proc_output = new double *[Nch];
-	for (i = 0; i < Nch; i++)
+	double time = 256;
+	std::thread t1(Keyboard_interrupt);
+	while (true)
 	{
-		input[i] = new double[BufferSize];
-		proc_output[i] = new double[3 * BufferSize];
-		for (j = 0; j < BufferSize; j++)
+		while (true)
 		{
-			input[i][j] = 0.0;
+			if (fF5 == true)
+			{
+				SLEEP(200);
+				fF5 = false;
+				break;
+			}
+			if (fF6 == true)
+			{
+				SLEEP(200);
+				fF6 = false;
+				t1.join();
+				return 0;
+			}
 		}
-	}
 
-	ProcBuffers *proc;
-	proc = new ProcBuffers();
+		record_num = 0;
+		copyend = 0;
+		int in_buffer_cnt = 0;
+		int out_buffer_cnt = 0;
+		int i, j, ch;
+		int proc_end = 0;
+		int proc_count = 0;
+		unsigned int channels, fs, bufferBytes, oDevice = 0, iDevice = 0, iOffset = 0, oOffset = 0;
 
-	RtAudio adac;
-	if (adac.getDeviceCount() < 1) {
-		std::cout << "\nNo audio devices found!\n";
-		exit(1);
-	}
-	channels = Nch;
-	fs = 48000;
+		double** input, ** proc_output;
 
-	adac.showWarnings(true);
-
-	// Set the same number of channels for both input and output.
-	unsigned int bufferFrames = BufferSize;
-	RtAudio::StreamParameters iParams, oParams;
-	iParams.deviceId = iDevice;
-	iParams.nChannels = channels;
-	iParams.firstChannel = iOffset;
-	oParams.deviceId = oDevice;
-	oParams.nChannels = channels;
-	oParams.firstChannel = oOffset;
-
-	if (iDevice == 0)
-		iParams.deviceId = adac.getDefaultInputDevice();
-	if (oDevice == 0)
-		oParams.deviceId = adac.getDefaultOutputDevice();
-
-	RtAudio::StreamOptions options;
-	//options.flags |= RTAUDIO_NONINTERLEAVED;
-
-	InputData data;
-	data.in_buffer = 0;
-	data.out_buffer = 0;
-	data.z_buffer = 0;
-
-	//위의 inout이라는 callback함수를 스트리밍 하기 위해 여러 argument를 입력하고 open한다.
-	try {
-		adac.openStream(&oParams, &iParams, FORMAT, fs, &bufferFrames, &inout, (void *)&data, &options);
-	}
-	catch (RtAudioError& e) {
-		std::cout << '\n' << e.getMessage() << '\n' << std::endl;
-		exit(1);
-	}
-
-	data.bufferBytes = bufferFrames * channels * sizeof(MY_TYPE);
-	data.totalFrames = (unsigned long)(fs * time);
-	data.iframeCounter = 0;
-	data.oframeCounter = 0;
-	data.channels = channels;
-	unsigned long totalBytes;
-	totalBytes = data.totalFrames * channels * sizeof(MY_TYPE);
-
-	// Allocate the entire data buffer before starting stream.
-	data.in_buffer = (MY_TYPE*)malloc(totalBytes);
-	data.out_buffer = (MY_TYPE*)malloc(totalBytes);
-	data.z_buffer = new MY_TYPE[BufferSize * channels];
-	for (i = 0; i < BufferSize * channels; i++)
-	{
-		data.z_buffer[i] = 0.0;
-	}
-
-	if (data.in_buffer == 0 || data.out_buffer == 0) {
-		std::cout << "Memory allocation error ... quitting!\n";
-		goto cleanup;
-	}
-
-	//준비된 callback함수를 streaming 시작한다.
-	try {
-		adac.startStream();
-
-	}
-	catch (RtAudioError& e) {
-		std::cout << '\n' << e.getMessage() << '\n' << std::endl;
-		goto cleanup;
-	}
-
-	//streaming이 돌면서 앞의 callback(inout)함수에서 
-	while (adac.isStreamRunning())
-	{
-		if (record_num)
+		input = new double* [Nch];
+		proc_output = new double* [Nch];
+		for (i = 0; i < Nch; i++)
 		{
-			if (in_buffer_cnt >= fs * time * channels)
+			input[i] = new double[BufferSize];
+			proc_output[i] = new double[3 * BufferSize];
+			for (j = 0; j < BufferSize; j++)
 			{
-				in_buffer_cnt = 0;
+				input[i][j] = 0.0;
 			}
-			for (ch = 0; ch < channels; ch++)
+		}
+		ProcBuffers* proc;
+		proc = new ProcBuffers();
+
+		RtAudio adac;
+		if (adac.getDeviceCount() < 1) {
+			std::cout << "\nNo audio devices found!\n";
+			exit(1);
+		}
+		channels = Nch;
+		fs = 48000;
+
+		adac.showWarnings(true);
+
+		// Set the same number of channels for both input and output.
+		unsigned int bufferFrames = BufferSize;
+		RtAudio::StreamParameters iParams, oParams;
+		iParams.deviceId = iDevice;
+		iParams.nChannels = channels;
+		iParams.firstChannel = iOffset;
+		oParams.deviceId = oDevice;
+		oParams.nChannels = channels;
+		oParams.firstChannel = oOffset;
+
+		if (iDevice == 0)
+			iParams.deviceId = adac.getDefaultInputDevice();
+		if (oDevice == 0)
+			oParams.deviceId = adac.getDefaultOutputDevice();
+
+		RtAudio::StreamOptions options;
+		//options.flags |= RTAUDIO_NONINTERLEAVED;
+
+		InputData data;
+		data.in_buffer = 0;
+		data.out_buffer = 0;
+		data.z_buffer = 0;
+
+		//위의 inout이라는 callback함수를 스트리밍 하기 위해 여러 argument를 입력하고 open한다.
+		try {
+			adac.openStream(&oParams, &iParams, FORMAT, fs, &bufferFrames, &inout, (void*)&data, &options);
+		}
+		catch (RtAudioError & e) {
+			std::cout << '\n' << e.getMessage() << '\n' << std::endl;
+			exit(1);
+		}
+
+		data.bufferBytes = bufferFrames * channels * sizeof(MY_TYPE);
+		data.totalFrames = (unsigned long)(fs * time);
+		data.iframeCounter = 0;
+		data.oframeCounter = 0;
+		data.channels = channels;
+		unsigned long totalBytes;
+		totalBytes = data.totalFrames * channels * sizeof(MY_TYPE);
+
+		// Allocate the entire data buffer before starting stream.
+		data.in_buffer = (MY_TYPE*)malloc(totalBytes);
+		data.out_buffer = (MY_TYPE*)malloc(totalBytes);
+		data.z_buffer = new MY_TYPE[BufferSize * channels];
+		for (i = 0; i < BufferSize * channels; i++)
+		{
+			data.z_buffer[i] = 0.0;
+		}
+
+		if (data.in_buffer == 0 || data.out_buffer == 0) {
+			std::cout << "Memory allocation error ... quitting!\n";
+			goto cleanup;
+		}
+
+		//준비된 callback함수를 streaming 시작한다.
+		try {
+			adac.startStream();
+
+		}
+		catch (RtAudioError & e) {
+			std::cout << '\n' << e.getMessage() << '\n' << std::endl;
+			goto cleanup;
+		}
+
+		//streaming이 돌면서 앞의 callback(inout)함수에서 
+		while (adac.isStreamRunning())
+		{
+			if (record_num)
 			{
-				for (i = 0; i < bufferFrames; i++)
+				if (in_buffer_cnt >= fs * time * channels)
 				{
-					input[ch][i] = (data.in_buffer[channels*i + ch + in_buffer_cnt]) / 32768.0; //input자료형에 맞게 변환하여 저장
-				}
-			}
-			in_buffer_cnt += bufferFrames * channels;
-			proc_count++;
-			//Process에서 발화구간에서는 proc_end에 1을 return한다. 발화구간이 아니면 0을 return한다.
-			proc_end = proc->Process(input, proc_count, proc_output);
-			//발화구간에서 처리된 데이터에 대해 출력을 위해 callback함수의 outbuffer에 넣어준다.
-			if (proc_end == 1)
-			{
-				if (out_buffer_cnt >= fs * time * channels)
-				{
-					out_buffer_cnt = 0;
+					in_buffer_cnt = 0;
 				}
 				for (ch = 0; ch < channels; ch++)
 				{
-					for (i = 0; i < 3 * bufferFrames; i++)
+					for (i = 0; i < bufferFrames; i++)
 					{
-						data.out_buffer[channels*i + ch + out_buffer_cnt] = (MY_TYPE)proc_output[ch][i]; //input자료형에 맞게 변환하여 저장
+						input[ch][i] = (data.in_buffer[channels * i + ch + in_buffer_cnt]) / 32768.0; //input자료형에 맞게 변환하여 저장
 					}
 				}
-				out_buffer_cnt += 3 * bufferFrames * channels;
-				copyend += 3;
+				in_buffer_cnt += bufferFrames * channels;
+				proc_count++;
+				//Process에서 발화구간에서는 proc_end에 1을 return한다. 발화구간이 아니면 0을 return한다.
+				proc_end = proc->Process(input, proc_count, proc_output);
+
+				//발화구간에서 처리된 데이터에 대해 출력을 위해 callback함수의 outbuffer에 넣어준다.
+				if (proc_end == 1)
+				{
+					if (out_buffer_cnt >= fs * time * channels)
+					{
+						out_buffer_cnt = 0;
+					}
+					for (ch = 0; ch < channels; ch++)
+					{
+						for (i = 0; i < 3 * bufferFrames; i++)
+						{
+							data.out_buffer[channels * i + ch + out_buffer_cnt] = (MY_TYPE)proc_output[ch][i]; //input자료형에 맞게 변환하여 저장
+						}
+					}
+					out_buffer_cnt += 3 * bufferFrames * channels;
+					copyend += 3;
+				}
+				record_num--;
 			}
-			record_num--;
+			else
+			{
+				SLEEP(16);
+			}
+			if (fF4 == true || fF6 == true)
+			{
+				SLEEP(200);
+				fF4 = false;
+				break;
+			}
 		}
-		else
+		delete proc;
+
+		for (i = 0; i < Nch; i++)
 		{
-			SLEEP(16);
+			delete[] input[i];
+		}
+		delete[] input;
+
+	cleanup:
+		if (adac.isStreamOpen()) adac.closeStream();
+	
+
+		delete data.in_buffer;
+		delete data.out_buffer;
+		if (fF6 == true)
+		{
+			SLEEP(200);
+			t1.join();
+			return 0;
 		}
 	}
-
-
-
-	delete proc;
-	for (i = 0; i < Nch; i++)
-	{
-		delete[] input[i];
-	}
-	delete[] input;
-
-cleanup:
-	if (adac.isStreamOpen()) adac.closeStream();
-
-	return 0;
 }

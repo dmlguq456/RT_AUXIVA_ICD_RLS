@@ -19,6 +19,17 @@ AUXIVA_ICD::AUXIVA_ICD()
 	int i, j, k, freq, ch;
 	int re, im;
 
+	lambda = new double* [Nch];
+	for (ch = 0; ch < Nch; ch++)
+	{
+		lambda[ch] = new double[7];
+	}
+	lambda_tmp = new double* [Nch];
+	for (ch = 0; ch < Nch; ch++)
+	{
+		lambda_tmp[ch] = new double[7];
+	}
+
 	X = new double *[Nch]; // Nch X Nfreq(Complex)
 	for (i = 0; i < Nch; i++)
 	{
@@ -419,16 +430,6 @@ void AUXIVA_ICD::AUXIVA_ICD_RLS(double **input, int frameInd, double **output)
 	CLIQUE.clique_matrix();
 	if (frameInd == 3)
 	{
-		lambda = new double* [Nch];
-		for (ch = 0; ch < Nch; ch++)
-		{
-			lambda[ch] = new double[CLIQUE.ncliq];
-		}
-		lambda_tmp = new double* [Nch];
-		for (ch = 0; ch < Nch; ch++)
-		{
-			lambda_tmp[ch] = new double[CLIQUE.ncliq];
-		}
 		for (ch = 0; ch < Nch; ch++)
 		{
 			for (cliq = 0; cliq < CLIQUE.ncliq; cliq++)
@@ -466,7 +467,7 @@ void AUXIVA_ICD::AUXIVA_ICD_RLS(double **input, int frameInd, double **output)
 			}
 		}
 	}
-
+	
 	for (ch = 0; ch < Nch; ch++)
 	{
 		for (freq = 0; freq < nfreq; freq++)
