@@ -1,0 +1,9 @@
+
+*.wav
+*.wav
+input/IN_ch1.wav
+input/IN_ch2.wav
+input/IN_ch3.wav
+output/IVA_ch1.wav
+output/IVA_ch2.wav
+output/IVA_ch3.wav

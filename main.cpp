@@ -144,17 +144,17 @@ void Keyboard_interrupt()
 		if (GetKeyState('S') < 0 && !fF4) // Stop
 		{
 			fF4 = true;
-			if (MAKE_FILE == 1) std::cout << "Recording and Processing have stopped" << std::endl;
+			if (MAKE_FILE == 1) std::cout << "... Recording and Processing have stopped" << std::endl;
 		}
 		if (GetKeyState('A') < 0 && !fF5) // Begin
 		{
 			fF5 = true;
-			if (MAKE_FILE == 1) std::cout << "Recording and Processing has begun" << std::endl;
+			if (MAKE_FILE == 1) std::cout << "... Recording and Processing has begun" << std::endl;
 		}
 		if (GetKeyState('D') < 0 && !fF6) // Quit
 		{
 			fF6 = true;
-			if (MAKE_FILE == 1) std::cout << "Program will be closed" << std::endl;
+			if (MAKE_FILE == 1) std::cout << "... Program will be closed" << std::endl;
 			return;
 		}
 		SLEEP(50);
