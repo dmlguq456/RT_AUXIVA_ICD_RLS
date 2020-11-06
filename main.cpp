@@ -30,10 +30,6 @@ typedef signed short MY_TYPE;
 
 int record_num = 0;
 int copyend = 0;
-int start = 2;
-bool fF4 = false;
-bool fF5 = false;
-bool fF6 = false;
 
 /*
 typedef S24 MY_TYPE;
@@ -136,11 +132,15 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 	}
 	return 0;
 }
+bool fF4 = false;
+bool fF5 = false;
+bool fF6 = false;
 
 void Keyboard_interrupt()
 {
 	while (true)
 	{
+		SLEEP(50);
 		if (GetKeyState('S') < 0 && !fF4) // Stop
 		{
 			fF4 = true;
@@ -163,13 +163,13 @@ void Keyboard_interrupt()
 
 int main(void)
 {
-
 	double time = 256;
 	std::thread t1(Keyboard_interrupt);
 	while (true)
 	{
 		while (true)
 		{
+			SLEEP(50);
 			if (fF5 == true)
 			{
 				SLEEP(200);
@@ -183,6 +183,7 @@ int main(void)
 				t1.join();
 				return 0;
 			}
+			SLEEP(50);
 		}
 
 		record_num = 0;
