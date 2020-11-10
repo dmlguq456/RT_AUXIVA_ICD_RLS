@@ -161,7 +161,7 @@ ProcBuffers::~ProcBuffers()
 	{
 		fclose(IVA[ch]);
 		sprintf(file_name1[0], ".\\output\\IVA_ch%d.pcm", ch + 1);
-		sprintf(file_name1[1], ".\\output\\IVA_ch%d_%d%d%d_%d%d%d.wav", ch + 1, tm.tm_year - 100, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+		sprintf(file_name1[1], ".\\output\\IVA_%d%d%d_%d%d%d_ch%d.wav",  tm.tm_year - 100, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, ch + 1);
 		pcm2wav(file_name1[0], file_name1[1], (long)(SamplingFreq));
 		remove(file_name1[0]);
 	}
@@ -172,7 +172,7 @@ ProcBuffers::~ProcBuffers()
 	{
 		fclose(IN[ch]);
 		sprintf(file_name2[0], ".\\input\\IN_ch%d.pcm", ch + 1);
-		sprintf(file_name2[1], ".\\input\\IN_ch%d_%d%d%d_%d%d%d.wav", ch + 1, tm.tm_year - 100, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+		sprintf(file_name2[1], ".\\input\\IN_%d%d%d_%d%d%d_ch%d.wav", tm.tm_year - 100, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, ch + 1);
 		pcm2wav(file_name2[0], file_name2[1], (long)(SamplingFreq));
 		remove(file_name2[0]);
 	}
@@ -287,6 +287,10 @@ int ProcBuffers::Process(double **input, int Nframe, double **output)
 		}
 
 #endif
+		return 1;
 	}
-	return 0;
+	else
+	{
+		return 0;
+	}
 }

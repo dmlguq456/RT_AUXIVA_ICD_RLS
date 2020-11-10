@@ -195,7 +195,7 @@ int main(void)
 		int proc_count = 0;
 		unsigned int channels, fs, bufferBytes, oDevice = 0, iDevice = 0, iOffset = 0, oOffset = 0;
 
-		double** input, ** proc_output;
+		double **input, **proc_output;
 
 		input = new double* [Nch];
 		proc_output = new double* [Nch];
@@ -290,10 +290,6 @@ int main(void)
 		{
 			if (record_num)
 			{
-				if (in_buffer_cnt >= fs * time * channels)
-				{
-					in_buffer_cnt = 0;
-				}
 				for (ch = 0; ch < channels; ch++)
 				{
 					for (i = 0; i < bufferFrames; i++)
@@ -309,15 +305,19 @@ int main(void)
 				//발화구간에서 처리된 데이터에 대해 출력을 위해 callback함수의 outbuffer에 넣어준다.
 				if (proc_end == 1)
 				{
-					if (out_buffer_cnt >= fs * time * channels)
-					{
-						out_buffer_cnt = 0;
-					}
+					proc_end = 0;
 					for (ch = 0; ch < channels; ch++)
 					{
-						for (i = 0; i < 3 * bufferFrames; i++)
+						for (i = 0; i < bufferFrames; i++)
 						{
-							data.out_buffer[channels * i + ch + out_buffer_cnt] = (MY_TYPE)proc_output[ch][i]; //input자료형에 맞게 변환하여 저장
+							//data.out_buffer[channels * (i) + ch + out_buffer_cnt] = (MY_TYPE)(input[ch][i] * 32768.0);
+							//data.out_buffer[channels * (3 * i) + ch + out_buffer_cnt] = (MY_TYPE)(input[ch][i] * 32768.0);
+							//data.out_buffer[channels * (3 * i + 1) + ch + out_buffer_cnt] = (MY_TYPE)(input[ch][i] * 32768.0);
+							//data.out_buffer[channels * (3 * i + 2) + ch + out_buffer_cnt] = (MY_TYPE)(input[ch][i] * 32768.0);
+							//data.out_buffer[channels * i + ch + out_buffer_cnt] = (MY_TYPE)(proc_output[ch][i] * 32768.0); //input자료형에 맞게 변환하여 저장
+							data.out_buffer[channels * (3 * i) + ch + out_buffer_cnt] = (MY_TYPE)(proc_output[ch][i] * 32768.0); //input자료형에 맞게 변환하여 저장
+							data.out_buffer[channels * (3 * i + 1) + ch + out_buffer_cnt] = (MY_TYPE)(proc_output[ch][i] * 32768.0); //input자료형에 맞게 변환하여 저장
+							data.out_buffer[channels * (3 * i + 2) + ch + out_buffer_cnt] = (MY_TYPE)(proc_output[ch][i] * 32768.0); //input자료형에 맞게 변환하여 저장
 						}
 					}
 					out_buffer_cnt += 3 * bufferFrames * channels;
@@ -341,8 +341,10 @@ int main(void)
 		for (i = 0; i < Nch; i++)
 		{
 			delete[] input[i];
+			delete[] proc_output[i];
 		}
 		delete[] input;
+		delete[] proc_output;
 
 	cleanup:
 		if (adac.isStreamOpen()) adac.closeStream();
