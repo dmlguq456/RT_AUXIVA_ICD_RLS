@@ -1,11 +1,1 @@
-﻿  ProcBuffers.cpp
-  main.cpp
-C:\Users\신의협\Github\RT_AUXIVA_ICD_RLS\main.cpp(267,17): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
-C:\Users\신의협\Github\RT_AUXIVA_ICD_RLS\main.cpp(269,23): warning C4244: '=': 'double'에서 'MY_TYPE'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\신의협\Github\RT_AUXIVA_ICD_RLS\main.cpp(296,21): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
-C:\Users\신의협\Github\RT_AUXIVA_ICD_RLS\main.cpp(298,20): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
-C:\Users\신의협\Github\RT_AUXIVA_ICD_RLS\main.cpp(315,22): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
-C:\Users\신의협\Github\RT_AUXIVA_ICD_RLS\main.cpp(317,21): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
-C:\Users\신의협\Github\RT_AUXIVA_ICD_RLS\main.cpp(195,30): warning C4101: 'bufferBytes' :참조되지 않은 지역 변수입니다.
-  코드를 생성하고 있습니다...
-  RT_AUXIVA_ICD_RLS.vcxproj -> C:\Users\신의협\Github\RT_AUXIVA_ICD_RLS\x64\Debug\RT_AUXIVA_ICD_RLS.exe
+﻿  RT_AUXIVA_ICD_RLS.vcxproj -> C:\Users\신의협\Github\RT_AUXIVA_ICD_RLS\x64\Debug\RT_AUXIVA_ICD_RLS.exe
