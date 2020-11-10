@@ -3,6 +3,7 @@
 #include "ProcBuffers.h"
 #include "sigproc.h"
 #include <iostream>
+#include <time.h>
 
 using namespace std;
 
@@ -152,12 +153,15 @@ ProcBuffers::~ProcBuffers()
 
 
 #if MAKE_FILE == 1
+	time_t t = time(NULL);
+	struct tm tm = *localtime(&t);
+
 	char file_name1[2][500];
 	for (ch = 0; ch < Nch; ch++)
 	{
 		fclose(IVA[ch]);
 		sprintf(file_name1[0], ".\\output\\IVA_ch%d.pcm", ch + 1);
-		sprintf(file_name1[1], ".\\output\\IVA_ch%d.wav", ch + 1);
+		sprintf(file_name1[1], ".\\output\\IVA_ch%d_%d%d%d_%d%d%d.wav", ch + 1, tm.tm_year - 100, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 		pcm2wav(file_name1[0], file_name1[1], (long)(SamplingFreq));
 		remove(file_name1[0]);
 	}
@@ -168,7 +172,7 @@ ProcBuffers::~ProcBuffers()
 	{
 		fclose(IN[ch]);
 		sprintf(file_name2[0], ".\\input\\IN_ch%d.pcm", ch + 1);
-		sprintf(file_name2[1], ".\\input\\IN_ch%d.wav", ch + 1);
+		sprintf(file_name2[1], ".\\input\\IN_ch%d_%d%d%d_%d%d%d.wav", ch + 1, tm.tm_year - 100, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 		pcm2wav(file_name2[0], file_name2[1], (long)(SamplingFreq));
 		remove(file_name2[0]);
 	}
