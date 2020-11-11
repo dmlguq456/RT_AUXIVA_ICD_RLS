@@ -172,13 +172,13 @@ int main(void)
 			SLEEP(50);
 			if (fF5 == true)
 			{
-				SLEEP(200);
+				SLEEP(100);
 				fF5 = false;
 				break;
 			}
 			if (fF6 == true)
 			{
-				SLEEP(200);
+				SLEEP(100);
 				fF6 = false;
 				t1.join();
 				return 0;
@@ -331,7 +331,7 @@ int main(void)
 			}
 			if (fF4 == true || fF6 == true)
 			{
-				SLEEP(200);
+				SLEEP(100);
 				fF4 = false;
 				break;
 			}
