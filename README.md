@@ -57,7 +57,7 @@ wav 저장 시에, 입력 및 출력 파일은 각각 input과 output 폴더 내
 - 처리 프로그램의 중단을 위해서는 키보드에 s키를 누릅니다.
 - 처리 프로그램의 종료를 위해서는 키보드의 d키를 누릅니다.
 
-![RT_AUXIVA_ICD_RLS%20a4850e780dca4b10af8bce98b139bf4e/Untitled.png](RT_AUXIVA_ICD_RLS%20a4850e780dca4b10af8bce98b139bf4e/Untitled.png)
+![screenshot](Sample_Spec/Screen.png)
 
 만약 wav저장 옵션으로 실행하였다면, 위와 같이 처리 중임을 안내하는 문구가 출력됩니다.
 
