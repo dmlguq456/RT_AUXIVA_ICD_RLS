@@ -6,12 +6,18 @@
 
 서강대 전자공학과 박형민 교수님 연구실에서 제작한 octa capture microphone을 사용한 실시간 입출력 처리 모듈이며, 여러 화자가 동시에 발화하는 다채널 음원 신호를 입력으로 해당 알고리즘이 예측한 음원 분리 결과를 실시간 line-out 출력 및 std out 혹은 wav파일을 반환 합니다.
 
-## **독립성분분석(Independent Vector Analysis, IVA)**
+## **IVA(Independent Vector Analysis) 알고리즘이란?**
 
-여러 독립적인 신호가 뒤섞인 음원에 대해서 각 출력 채널이 최대한 독립적인 신호로 구성되도록 분리하는 알고리즘입니다.
+여러 독립적인 신호가 뒤섞인 음원에 대해서 각 출력 채널이 최대한 독립적인 신호로 구성되도록 분리하는 알고리즘입니다. 특히 기존의 ICA(Independent Component Analysis)에서 주파수간의 의존성을 추가하여 주파수간의 뒤섞임 문제를 해결한 알고리즘입니다.
 
 1. 정상적으로 음원이 분리가 되기 위해서는 입력 마이크 채널의 개수보다 음원의 개수가 더 적어야 합니다.
 2. 어떤 음원이 몇 번째 출력 채널로 분리되어 나올지 알 수 없습니다.
+
+## **ICD(Inter-Clique Dependence) **
+
+IVA에서 사용되는 source pdf model을 clique(군집) 개념을 통해 원하는 방식으로 주파수 간의 의존성을 강화합니다. 그리고 이러한 clique간의 의존성 또한 강하게 주어 전체 주파수에 대한 의존성 또한 강화합니다. 이를 통해서 좀 더 유연한 source model를 설계하는 동시에 충분한 주파수간의 의존성을 주어 특히 화자가 3명 이상일 때, 높은 분리 성능을 보여줍니다. 
+
+https://ieeexplore.ieee.org/document/9057568
 
 ## Prerequisite
 
