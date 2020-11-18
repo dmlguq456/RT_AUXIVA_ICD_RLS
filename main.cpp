@@ -144,20 +144,16 @@ void Keyboard_interrupt()
 		if (GetKeyState('S') < 0 && !fF4) // Stop
 		{
 			fF4 = true;
-			if (MAKE_FILE == 1) std::cout << "... Recording and Processing have stopped" << std::endl;
 		}
 		if (GetKeyState('A') < 0 && !fF5) // Begin
 		{
 			fF5 = true;
-			if (MAKE_FILE == 1) std::cout << "... Recording and Processing has begun" << std::endl;
 		}
 		if (GetKeyState('D') < 0 && !fF6) // Quit
 		{
 			fF6 = true;
-			if (MAKE_FILE == 1) std::cout << "... Program will be closed" << std::endl;
 			return;
 		}
-		SLEEP(50);
 	}
 }
 
@@ -172,18 +168,23 @@ int main(void)
 			SLEEP(50);
 			if (fF5 == true)
 			{
-				SLEEP(100);
+				SLEEP(200);
 				fF5 = false;
+				fF4 = false;
+				if (MAKE_FILE == 1) std::cout << "... Recording and Processing has begun" << std::endl;
 				break;
+			}
+			if (fF4 == true)
+			{
+				fF4 = false;
 			}
 			if (fF6 == true)
 			{
-				SLEEP(100);
+				SLEEP(200);
 				fF6 = false;
 				t1.join();
 				return 0;
 			}
-			SLEEP(50);
 		}
 
 		record_num = 0;
@@ -333,6 +334,8 @@ int main(void)
 			{
 				SLEEP(100);
 				fF4 = false;
+				fF5 = false;
+				if (MAKE_FILE == 1) std::cout << "... Recording and Processing have stopped" << std::endl;
 				break;
 			}
 		}
@@ -356,6 +359,7 @@ int main(void)
 		{
 			SLEEP(200);
 			t1.join();
+			if (MAKE_FILE == 1) std::cout << "... Program will be closed" << std::endl;
 			return 0;
 		}
 	}
