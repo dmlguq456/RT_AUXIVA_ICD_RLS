@@ -26,8 +26,13 @@ double** in_buff;
 short** origin_out;
 double** input;
 
+int BuffCnt, isNew16k;
+
+
 ProcBuffers::ProcBuffers()
 {
+	BuffCnt = 0, isNew16k = 0;
+
 	int i, ch;
 
 	iip_AUX = new AUXIVA_ICD();
@@ -187,7 +192,6 @@ ProcBuffers::~ProcBuffers()
 int ProcBuffers::Process(double **input, int Nframe, double **output)
 {
 	int i, j, ch;
-	static int BuffCnt = 0, isNew16k = 0;
 	//OCTA-Capture로 들어오는 input 48k이므로 process를 진행하기 위해 16k로 Down Sampling을 해야한다.
 	isNew16k = (BuffCnt == 2);
 	for (ch = 0; ch < Nch; ch++)
