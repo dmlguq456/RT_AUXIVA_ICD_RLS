@@ -159,7 +159,7 @@ void Keyboard_interrupt()
 
 int main(void)
 {
-	double time = 256;
+	double time = 2048;
 	std::thread t1(Keyboard_interrupt);
 	while (true)
 	{
@@ -328,7 +328,7 @@ int main(void)
 			}
 			else
 			{
-				SLEEP(16);
+				SLEEP(4);
 			}
 			if (fF4 == true || fF6 == true)
 			{
