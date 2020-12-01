@@ -18,6 +18,7 @@ input directly through to the output.
 #include "header.h"
 #include "ProcBuffers.h"
 #include <thread>
+#include <atomic>
 
 /*
 typedef char MY_TYPE;
@@ -28,8 +29,8 @@ typedef char MY_TYPE;
 typedef signed short MY_TYPE;
 #define FORMAT RTAUDIO_SINT16
 
-int record_num = 0;
-int copyend = 0;
+std::atomic<int> record_num;
+std::atomic<int> copyend;
 
 /*
 typedef S24 MY_TYPE;
@@ -97,7 +98,7 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 	//저장된 버퍼가 존재하면 이를 process하기 위해 복사하며 처리할 데이터가 존재한다고 record_num으로 확인한다.
 	memcpy(iData->in_buffer + in_offset, inputBuffer, iData->bufferBytes);
 	iData->iframeCounter += frames;
-	record_num++;
+	record_num.fetch_add(1);
 
 	//저장된 데이터가 최대 버퍼사이즈를 넘기면 다시 offset을 0으로 하여 overwriting한다.
 	//이미 앞의 데이터는 process를 위해 복사되었다.
@@ -108,7 +109,7 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 	}
 
 	//process에서 처리된 데이터가 실시간 출력을 위해 처리 후 발생하는 copyend라는 신호가 뜨면 callback함수의 output으로 복사한다.
-	if (copyend)
+	if (copyend.load())
 	{
 		if (iData->oframeCounter + nBufferFrames > iData->totalFrames)
 		{
@@ -119,14 +120,14 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 		memcpy(outputBuffer, iData->out_buffer + out_offset, iData->bufferBytes);
 		iData->oframeCounter += frames;
 		//처리된 데이터가 출력되면 copyend값을 줄인다.
-		copyend--;
+		copyend.fetch_sub(1);
 		if (iData->oframeCounter >= iData->totalFrames)
 		{
 			iData->oframeCounter = 0;
 		}
 	}
 	//처리된 데이터가 없으면 (발화구간이 없는경우) 0을 출력한다.
-	else if (copyend == 0)
+	else if (copyend.load() == 0)
 	{
 		memcpy(outputBuffer, iData->z_buffer, iData->bufferBytes);
 	}
@@ -187,8 +188,8 @@ int main(void)
 			}
 		}
 
-		record_num = 0;
-		copyend = 0;
+		record_num.store(0);
+		copyend.store(0);
 		int in_buffer_cnt = 0;
 		int out_buffer_cnt = 0;
 		int i, j, ch;
@@ -289,7 +290,7 @@ int main(void)
 		//streaming이 돌면서 앞의 callback(inout)함수에서 
 		while (adac.isStreamRunning())
 		{
-			if (record_num)
+			if (record_num.load())
 			{
 				for (ch = 0; ch < channels; ch++)
 				{
@@ -311,20 +312,15 @@ int main(void)
 					{
 						for (i = 0; i < bufferFrames; i++)
 						{
-							//data.out_buffer[channels * (i) + ch + out_buffer_cnt] = (MY_TYPE)(input[ch][i] * 32768.0);
-							//data.out_buffer[channels * (3 * i) + ch + out_buffer_cnt] = (MY_TYPE)(input[ch][i] * 32768.0);
-							//data.out_buffer[channels * (3 * i + 1) + ch + out_buffer_cnt] = (MY_TYPE)(input[ch][i] * 32768.0);
-							//data.out_buffer[channels * (3 * i + 2) + ch + out_buffer_cnt] = (MY_TYPE)(input[ch][i] * 32768.0);
-							//data.out_buffer[channels * i + ch + out_buffer_cnt] = (MY_TYPE)(proc_output[ch][i] * 32768.0); //input자료형에 맞게 변환하여 저장
 							data.out_buffer[channels * (3 * i) + ch + out_buffer_cnt] = (MY_TYPE)(proc_output[ch][i] * 32768.0); //input자료형에 맞게 변환하여 저장
 							data.out_buffer[channels * (3 * i + 1) + ch + out_buffer_cnt] = (MY_TYPE)(proc_output[ch][i] * 32768.0); //input자료형에 맞게 변환하여 저장
 							data.out_buffer[channels * (3 * i + 2) + ch + out_buffer_cnt] = (MY_TYPE)(proc_output[ch][i] * 32768.0); //input자료형에 맞게 변환하여 저장
 						}
 					}
 					out_buffer_cnt += 3 * bufferFrames * channels;
-					copyend += 3;
+					copyend.fetch_add(3);
 				}
-				record_num--;
+				record_num.fetch_sub(1);
 			}
 			else
 			{
