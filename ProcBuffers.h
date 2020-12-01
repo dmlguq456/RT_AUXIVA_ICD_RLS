@@ -4,10 +4,22 @@
 class ProcBuffers
 {
 private:
-	
+	double** InitCond, * XX_LP, * XX, ** xx_lp, ** x;
+
+	double** out_buff;
+	short** IVA_out;
+	double** input_temp;
+	double** output;
+
+	double** in_buff;
+	short** origin_out;
+	double** input;
+
+	int BuffCnt, isNew16k;
+
 
 public:
 	ProcBuffers();
 	~ProcBuffers();
-	static int Process(double **input, int Nframe, double **output);
+	int Process(double **input, int Nframe, double **output);
 };

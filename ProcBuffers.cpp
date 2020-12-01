@@ -15,23 +15,12 @@ FILE** IN;
 #endif
 
 //For downsampling (48k to 16k)
-double **InitCond, *XX_LP, *XX, **xx_lp, **x;
-
-double **out_buff;
-short **IVA_out;
-double **input_temp;
-double **output;
-
-double** in_buff;
-short** origin_out;
-double** input;
-
-int BuffCnt, isNew16k;
 
 
 ProcBuffers::ProcBuffers()
 {
-	BuffCnt = 0, isNew16k = 0;
+	BuffCnt = 0;
+	isNew16k = 0;
 
 	int i, ch;
 
